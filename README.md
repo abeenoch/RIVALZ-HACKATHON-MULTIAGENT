@@ -34,7 +34,5 @@ The system leverages multiple agents to handle tasks like:
 ```bash
 pip install -r requirements.txt
 
- Run the project:
-```bash
 python multi_agent_example.py
 
