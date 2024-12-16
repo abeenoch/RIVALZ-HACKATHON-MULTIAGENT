@@ -12,8 +12,10 @@ from langchain_community.tools import DuckDuckGoSearchResults
 # Initialize Swarm with telemetry (for Rivalz AI Network)
 client = Swarm()
 
+
 from langchain_community.tools import DuckDuckGoSearchResults
 
+import json
 from langchain_community.tools import DuckDuckGoSearchResults
 
 def rivalz_network_info(query: str) -> dict:
@@ -34,30 +36,47 @@ def rivalz_network_info(query: str) -> dict:
         full_query = f"Rivalz AI {query}"
         
         # Perform the search and retrieve the results
-        results = search_tool.run(full_query)
+        raw_results = search_tool.run(full_query)
         
-        # Validate results and filter for relevance
-        if not results:
-            return {"message": f"No results found for query: '{query}'."}
-        
-        # Filter and structure the output for clarity
-        relevant_results = [
-            {
-                "title": result.get("title", "No Title"),
-                "url": result.get("link", "No URL"),
-                "snippet": result.get("snippet", "No Snippet")
+        # Ensure results are valid JSON if applicable
+        try:
+            results = json.loads(raw_results) if isinstance(raw_results, str) else raw_results
+        except json.JSONDecodeError:
+            return {
+                "error": "Invalid Response Format",
+                "message": "Could not parse search results into JSON.",
+                "raw_results": raw_results,
             }
-            for result in results if "Rivalz AI" in result.get("title", "") or "Rivalz AI" in result.get("snippet", "")
-        ]
+
+        # Validate that results is iterable and contains dictionaries
+        if not isinstance(results, list):
+            return {
+                "error": "Unexpected Response Structure",
+                "message": "Results are not in the expected list format.",
+                "raw_results": results,
+            }
+
+        # Filter and structure the output for clarity
+        relevant_results = []
+        for result in results:
+            if isinstance(result, dict):  # Ensure each result is a dictionary
+                title = result.get("title", "No Title")
+                url = result.get("link", "No URL")
+                snippet = result.get("snippet", "No Snippet")
+                
+                if "Rivalz AI" in title or "Rivalz AI" in snippet:
+                    relevant_results.append({"title": title, "url": url, "snippet": snippet})
         
         # If no relevant results, return a fallback message
         if not relevant_results:
             return {"message": f"No relevant results found for Rivalz AI query: '{query}'."}
         
-        return {"results": relevant_results[:5]}  # Return up to 5 relevant results
+        return {"results": relevant_results[:3]}  # Return up to 5 relevant results
 
     except Exception as e:
         return {"error": "Search Tool Error", "message": str(e)}
+
+
 
 
 
@@ -167,7 +186,7 @@ def transfer_to_financial_analyst():
     return financial_analyst_agent
 
 # Assign functions to the agents
-triage_agent.functions = [transfer_to_onchain_operations, transfer_to_financial_analyst]
+triage_agent.functions = [transfer_to_onchain_operations, transfer_to_financial_analyst, rivalz_network_info]
 onchain_operations_agent.functions.append(transfer_back_to_triage)
 financial_analyst_agent.functions.append(transfer_back_to_triage)
 
