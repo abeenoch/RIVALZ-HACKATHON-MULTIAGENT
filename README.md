@@ -1,5 +1,4 @@
-# RIVALZ-HACKATHON-MULTIAGENT
-# Multi-Agent RAG System with TVL Monitoring
+# Multi-Agent System
 
 ## Overview
 This project demonstrates a multi-agent Retrieval-Augmented Generation (RAG) system, enhanced with Total Value Locked (TVL) monitoring for various DeFi chains using the [DeFiLlama API](https://defillama.com/).
@@ -18,21 +17,4 @@ The system leverages multiple agents to handle tasks like:
 - **Error Handling**: Includes retries and logging for better fault tolerance.
 
 ---
-
-## Installation
-
-### Prerequisites
-- Python 3.8+
-- `pip` for dependency management
-
-### Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/your-repo-name.git
-   cd your-repo-name
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
-
-python multi_agent_example.py
 
